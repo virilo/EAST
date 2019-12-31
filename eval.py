@@ -33,6 +33,7 @@ def get_images():
                     files.append(os.path.join(parent, filename))
                     break
     print('Find {} images'.format(len(files)))
+#    print(files)
     return files
 
 
@@ -96,7 +97,7 @@ def detect(score_map, geo_map, timer, score_map_thresh=0.8, box_thresh=0.1, nms_
     timer['restore'] = time.time() - start
     # nms part
     start = time.time()
-    # boxes = nms_locality.nms_locality(boxes.astype(np.float64), nms_thres)
+#    boxes = nms_locality.nms_locality(boxes.astype(np.float64), nms_thres)
     boxes = lanms.merge_quadrangle_n9(boxes.astype('float32'), nms_thres)
     timer['nms'] = time.time() - start
 
@@ -125,6 +126,8 @@ def sort_poly(p):
 def main(argv=None):
     import os
     os.environ['CUDA_VISIBLE_DEVICES'] = FLAGS.gpu_list
+    
+    prev_output_dir=""
 
 
     try:
@@ -173,8 +176,11 @@ def main(argv=None):
 
                 # save to file
                 if boxes is not None:
+                    output_dir=os.path.dirname(im_fn.replace(FLAGS.test_data_path, FLAGS.output_dir))
+                    if output_dir!=prev_output_dir:
+                        os.makedirs(output_dir, exist_ok=True)
                     res_file = os.path.join(
-                        FLAGS.output_dir,
+                        output_dir,
                         '{}.txt'.format(
                             os.path.basename(im_fn).split('.')[0]))
 
